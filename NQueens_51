@@ -1,0 +1,147 @@
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 题目：https://leetcode-cn.com/problems/n-queens/
+ * 题解：https://leetcode-cn.com/problems/n-queens/solution/
+ */
+public class NQueens_51 {
+
+    int n;
+
+    /**
+     *  hills数组为标记数组，由于判断同一副对角线/是否已放置元素
+     *  处于同一副对角线的元素row-col为常数，且row-col的取值范围：[-(n-1),n-1]  (row,col索引从0开始)
+     *  放置元素时hills[row-col+n-1]置为1，移除时置为0
+     */
+    int[] hills;
+
+    /**
+     * dales数组为标记数组，由于判断同一主对角线\是否已放置元素
+     * 处于同一主对角线的元素row+col为常数，且row+col的取值范围：[0,2n-2]  (row,col索引从0开始)
+     * 放置元素时hills[row+col]置为1，移除时置为0
+     */
+    int[] dales;
+
+    /**
+     * rows数组为标记数组，由于判断同一列是否已放置元素
+     * 放置元素时rows[对应的col]置为1，移除时置为0
+     */
+    int[] rows;
+
+    /**
+     * queen数组用于记录每行皇后放置的位置
+     */
+    int[] queens;
+
+    List<List<String>> result=new ArrayList<>();
+
+    /**
+     *
+     * @param n N-Queen
+     * @return result
+     */
+
+    public List<List<String>> solveNQueens(int n) {
+        this.n=n;
+        hills=new int[2*n-1];
+        dales=new int[2*n-1];
+        rows=new int[n];
+        queens=new int[n];
+        backTrack(0);
+        return result;
+    }
+
+    /**
+     * 算法过程：
+     *从第一个 row = 0 开始.
+     *循环列并且试图在每个 col 中放置皇后.
+     *      如果方格 (row, col) 不在攻击范围内
+     *              在 (row, col) 方格上放置皇后。
+     *              排除对应行，列和两个对角线的位置。
+     *              If 所有的行被考虑过，row == N
+     *                      意味着我们找到了一个解
+     *              Else
+     *                      继续考虑接下来的皇后放置 backtrack(row + 1).
+     *              回溯：将在 (row, column) 方格的皇后移除.
+     *
+     * @param row
+     */
+    public void backTrack(int row){
+        for(int col=0;col<n;col++){
+            if(!isUnderAttack(row,col)){
+                //放置皇后
+                placeQueen(row,col);
+                if(row==n-1)
+                    addSolution();
+                else
+                    backTrack(row+1);
+                removeQueen(row,col);
+            }
+        }
+
+    }
+
+    /**
+     * 判断元素所在的列、同一主对角线、同一副对角线是否已放置元素
+     * @param row 元素所在的行
+     * @param col 元素所在的列
+     * @return
+     */
+    public boolean isUnderAttack(int row,int col){
+        int res=rows[col]+hills[row-col+n-1]+dales[row+col];
+        return res>0?true:false;
+    }
+
+    /**
+     * 放置元素
+     * @param row 元素所在的行
+     * @param col 元素所在的列
+     */
+    public void placeQueen(int row,int col){
+        hills[row-col+n-1]=1;
+        dales[row+col]=1;
+        rows[col]=1;
+        queens[row]=col;
+    }
+
+    /**
+     * 移除元素
+     * @param row 元素所在的行
+     * @param col 元素所在的列
+     */
+    public void removeQueen(int row,int col){
+        hills[row-col+n-1]=0;
+        dales[row+col]=0;
+        rows[col]=0;
+        queens[row]=0;
+    }
+
+    /**
+     * 找到一个解时，将queen数组转换成输出格式
+     */
+    public void addSolution(){
+        List<String> solution=new ArrayList<>();
+        for(int i=0;i<n;i++){
+            StringBuilder str=new StringBuilder();
+            for(int j=0;j<n;j++){
+                if(queens[i]==j)
+                    str.append("Q");
+                else
+                    str.append(".");
+            }
+            solution.add(str.toString());
+        }
+        result.add(solution);
+    }
+
+    @Test
+    public void test(){
+        int n=4;
+        solveNQueens(n);
+        System.out.println(result);
+    }
+
+}
